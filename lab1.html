@@ -1,0 +1,136 @@
+
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>Canvas</title>
+
+		<style type="text/css">
+			body {
+				background-color: white;
+			}
+
+			/* 5) Draw a black border */
+			canvas {
+				border: solid black 2px;
+			}
+
+			/* Set the text colour of paragraphs to blue, with 40% transparency. */
+			p {
+				color: rgba(0, 0, 255, 0.6);
+			}
+		</style>
+
+	</head>
+
+	<body>
+
+		<canvas id="canvasOne" width="1200" height="900"></canvas>
+
+		<p>This is a paragraph</p>
+
+		<script type="text/javascript">
+			// Gets a handle to the element with id canvasOne.
+			var canvas = document.getElementById("canvasOne");
+			// Set the canvas up for drawing in 2D.
+			var ctx = canvas.getContext("2d");
+			
+			// Set the fill colour to bright red.
+			// ctx.fillStyle = "rgb(255, 0, 0)";
+			// 3) Change the fill colour to blue 
+			ctx.fillStyle = "rgb(0, 0, 255)";
+			
+			// Create a filled rectangle at co-ordinates (10,10)
+			// with height and width set to 100.
+			// ctx.fillRect(10, 10, 100, 100);
+			// 4)Change the width to 200px and the height to 1000px
+			ctx.fillRect(10, 10, 1000, 200);
+
+			// 7 & 8) Draw a red rectangle with 40% transparency
+			ctx.fillStyle = "rgba(255, 0, 0, 0.6)";
+			ctx.fillRect(20, 20, 1000, 200);
+
+			// 9) Draw a red and blue circle
+			// Red circle
+			ctx.beginPath();
+			ctx.arc(400, 300, 50, 0, 2 * Math.PI, false);
+			ctx.fillStyle = "rgb(255, 0, 0)";
+			ctx.fill();
+
+			// Blue circle
+			ctx.beginPath();
+			ctx.arc(400, 500, 50, 0, 2 * Math.PI, false);
+			ctx.fillStyle = "rgb(0, 0, 255)";
+			ctx.fill();
+
+			// 10) Draw a red square with a blue circle fitting perfectly inside it
+			ctx.beginPath();
+			ctx.fillStyle = "rgb(255, 0, 0)";
+			ctx.fillRect(50, 300, 200, 200);
+
+			ctx.beginPath();
+			ctx.arc(150, 400, 100, 0, 2 * Math.PI, false);
+			ctx.fillStyle = "rgb(0, 0, 255)";
+			ctx.fill();
+
+			// Advanced 2)
+			// Draw a pac-man shape
+			ctx.beginPath();
+			ctx.arc(700, 400, 100, 0.2 * Math.PI, 1.8 * Math.PI, false);
+			ctx.lineTo(700, 400);
+			ctx.closePath();
+			ctx.lineWidth = 5;
+			ctx.stroke();
+
+			ctx.fillStyle = "rgb(255, 255, 0)";	// Yellow
+			ctx.fill();
+
+			// Draw pac-man's eye
+			ctx.beginPath();
+			ctx.arc(705, 350, 10, 0, 2 * Math.PI, false);
+			ctx.lineTo(700, 400);
+			
+			ctx.fillStyle = "rgb(0, 0, 0)";		// Black
+			ctx.fill();
+
+			// Advanced 1)
+			// Move a circle 50px to the right over 3 seconds
+			var startingX = 150;
+			var x = 0;
+			var distance = 50;				// Distance in pixels
+			var time = 3;					// Time in seconds
+			var lastFrame = Date.now();		// Used to calculate delta time (Updated every frame)
+			var startTime = Date.now();		// Used for output message (Doesn't change)
+
+			function animate() {
+				ctx.clearRect(0, 600, 300, 300);				// Clear the rect were the previous ball was drawn
+
+				// Adapted from https://www.viget.com/articles/time-based-animation
+				var delta = (Date.now() - lastFrame) / 1000;	// Seconds since last frame
+				var speed = (distance / time);					// Distance / Time
+				x += speed * delta;
+				lastFrame = Date.now();
+
+				// Draw the circle
+				ctx.beginPath();
+				ctx.arc(startingX + x, 700, 20, 0, 2 * Math.PI, false);
+				ctx.fillStyle = "rgb(0, 0, 255)";
+				ctx.fill();
+
+				// Call this function again if the ball hasn't yet reached it's destination
+				if (x < distance) {
+					window.requestAnimationFrame(animate);
+				} else {
+					var seconds = (lastFrame - startTime) / 1000;
+					console.log ("The ball moved " + distance + "px in " + seconds + " seconds");
+				}
+			}
+
+			animate();
+		</script>
+
+	</body>
+
+</html>

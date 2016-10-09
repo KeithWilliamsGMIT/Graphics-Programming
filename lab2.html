@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>Canvas</title>
+
+		<style type="text/css">
+			body {
+				background-color: white;
+			}
+
+			canvas {
+				border: solid black 2px;
+			}
+		</style>
+
+	</head>
+
+	<body>
+
+		<canvas id="canvasOne" width="1200" height="900"></canvas>
+	
+		<script type="text/javascript">
+			var canvas = document.getElementById("canvasOne");
+			var ctx = canvas.getContext("2d");
+
+			function Ball() {
+				this.x = 50;
+				this.y = 50;
+				this.r = 25;
+
+				this.move = function (x, y) {
+					this.x += x;
+					this.y += y;
+				}
+
+				this.resize = function (r) {
+					this.r = r;
+				}
+
+				this.draw = function () {
+				
+					/* Step 8
+					ctx.beginPath();
+					ctx.arc (this.x, this.y, this.r, 0, Math.PI * 2, false);
+					ctx.fill ();*/
+
+					// Step 9 - Pizza with 7 slices
+					ctx.beginPath();
+
+					var slices = 7;
+
+					// Method One - Draw several arcs and a line to the centre after each one
+					/*for (var i = 0; i < slices; ++i) {
+						ctx.arc (this.x, this.y, this.r, (Math.PI * 2 / slices) * i, (Math.PI * 2 / slices) * (i + 1), false);
+						ctx.lineTo(this.x, this.y);
+					}*/
+
+					// Method Two - Draw one arc and draw lines afterwards
+					ctx.arc (this.x, this.y, this.r, 0, Math.PI * 2, false);
+
+					for (var i = 0; i < slices; ++i) {
+						// x = r × cos(θ)
+						// y = r × sin(θ)
+
+						toX = this.x + (this.r * Math.cos((Math.PI * 2 / slices) * i));
+						toY = this.y + (this.r * Math.sin((Math.PI * 2 / slices) * i));
+
+						ctx.moveTo(this.x, this.y);
+						ctx.lineTo(toX, toY);
+					}
+				
+					ctx.moveTo(this.x, this.y);
+
+					// Draw inner arc
+					ctx.arc (this.x, this.y, this.r * 0.9, 0, Math.PI * 2, false);
+
+					ctx.stroke ();
+				}
+
+				// Return true if this ball contains the given coordinate
+				this.contains = function (x, y) {
+					var contains = Math.pow(x - this.x, 2) + Math.pow(y - this.y, 2) < Math.pow(this.r, 2) + 1;
+				
+					// Display a message telling the user if the ball contains the given point
+					console.log ("Does circle contain (" + x + ", " + y + "): " + contains);
+				
+					// Draw the point
+					ctx.beginPath ();
+					ctx.rect(x - 2, y - 2, 4, 4);
+					ctx.fillStyle = "rgb(255, 0, 0)";
+					ctx.fill ();
+				
+					return contains;
+				}
+
+				// Return true if this ball intersects the given ball
+				this.intersects = function (ball) {
+					// Formula adapted from stackoverflow
+					// http://stackoverflow.com/questions/8367512/algorithm-to-detect-if-a-circles-intersect-with-any-other-circle-in-the-same-pla
+					var intersects = Math.hypot(this.x - ball.x, this.y - ball.y) < (this.r + ball.r);
+				
+					// Display a message telling the user if the balls intersect each other
+					console.log ("Do the circles intersect: " + intersects);
+				
+					return intersects;
+				}
+			}
+
+			var ball = new Ball();
+			ball.draw ();
+
+			ball.move (50, 50);
+			ball.draw ();
+
+			ball.move (100, 100);
+			ball.resize (50);
+			ball.draw ();
+
+			ball.contains (200, 250);
+
+			// Create a second ball and check if it intersects the first
+			var secondBall = new Ball();
+
+			// Circles do intersect
+			secondBall.move (100, 100);	
+			ball.intersects (secondBall);
+			secondBall.draw ();
+
+			// Circles don't intersect
+			secondBall.move (500, 100);
+			ball.intersects (secondBall);
+			secondBall.draw ();
+		</script>
+
+	</body>
+
+</html>
