@@ -1,0 +1,234 @@
+
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>Canvas</title>
+
+		<style type="text/css">
+			canvas {
+				border: 1px solid grey; 
+			}
+		</style>
+
+	</head>
+
+	<body>
+		<canvas id="canvas" width="300" height="300"></canvas>
+
+		<script type="text/javascript">
+			// Gets a handle to the element with id canvasOne.
+			var canvas = document.getElementById("canvas");
+			// Get a 2D context for the canvas.
+			var ctx = canvas.getContext("2d");
+			
+			// Create a new Game object
+			var game = new Game();
+			
+			// Set up the game
+			game.initializeGame();
+			
+			// Reset the game by clearing the canvas and drawing a new board
+			function resetGame(event) {
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				game.initializeGame();
+				
+				// Remove the click event handler that called this function
+				canvas.removeEventListener("click", resetGame);
+			}
+			
+			function Game() {
+				this.cellSize = 100;
+				this.numCells = 3;
+				this.board = [this.numCells];
+				this.players = 2;
+				this.playerTurn = 1;
+				this.movesTaken = 0;
+				
+				this.initializeGame = function () {
+					// Initialize the board array with empty arrays
+					for (var x = 0; x < this.numCells; ++x) {
+						this.board[x] = [];
+					}
+					
+					this.drawGrid();
+					
+					// The width of the line used for drawing X's and O's
+					ctx.lineWidth = 10;
+					
+					// Set to be player 1's turn
+					this.playerTurn = 1;
+					
+					// Reset the moves taken to 0
+					this.movesTaken = 0;
+					
+					// Add a click event listner to the canvas
+					canvas.addEventListener("click", clicked);
+				}
+				
+				this.drawGrid = function () {
+					canvas.width = this.cellSize * this.numCells;
+					canvas.height = this.cellSize * this.numCells;
+					
+					for (var x = 0; x < this.numCells; ++x) {
+						for (var y = 0; y < this.numCells; ++y) {
+							ctx.beginPath();
+							ctx.rect(x * this.cellSize, y * this.cellSize, this.cellSize, this.cellSize);
+							ctx.stroke();
+						}
+					}
+				}
+				
+				this.drawX = function (x, y) {
+					ctx.beginPath();
+					
+					var halfSize = (this.cellSize / 2) - 10;
+					
+					var xPos = ((x * this.cellSize) + (this.cellSize / 2));
+					var yPos = ((y * this.cellSize) + (this.cellSize / 2));
+					
+					ctx.moveTo(xPos - halfSize, yPos - halfSize);
+					ctx.lineTo(xPos + halfSize, yPos + halfSize);
+
+					ctx.moveTo(xPos + halfSize, yPos - halfSize);
+					ctx.lineTo(xPos - halfSize, yPos + halfSize);
+					
+					ctx.strokeStyle = "rgb(0, 170, 195)";
+					ctx.stroke();
+					
+					this.checkWin(x, y);
+				}
+				
+				this.drawO = function (x, y) {
+					ctx.beginPath();
+					
+					var xPos = ((x * this.cellSize) + (this.cellSize / 2));
+					var yPos = ((y * this.cellSize) + (this.cellSize / 2));
+					
+					ctx.arc(xPos,
+							yPos,
+							((this.cellSize / 2) - 10),
+							0,
+							Math.PI * 2,
+							false);
+					
+					ctx.strokeStyle = "rgb(230, 130, 0)";
+					ctx.stroke();
+					
+					this.checkWin(x, y);
+				}
+				
+				this.checkWin = function (x, y) {
+					var hasWon = false;
+					
+					// Check columns
+					for (var i = 0; i < this.numCells; ++i) {
+						if (this.board[x][i] != this.playerTurn)
+							break;
+
+						if (i == this.numCells - 1) {
+							hasWon = true;
+						}
+					}
+
+					// Check rows
+					for (var i = 0; i < this.numCells; ++i) {
+						if (this.board[i][y] != this.playerTurn)
+							break;
+						
+						if (i == this.numCells - 1) {
+							hasWon = true;
+						}
+					}
+
+					// Check diagonals
+					if (x == y) {
+						for (var i = 0; i < this.numCells; ++i) {
+							if (this.board[i][i] != this.playerTurn)
+								break;
+							
+							if (i == this.numCells - 1) {
+								hasWon = true;
+							}
+						}
+					}
+					
+					for (var i = 0; i < this.numCells; ++i){
+						if (this.board[i][(this.numCells - 1) - i] != this.playerTurn)
+							break;
+						
+						if (i == this.numCells - 1) {
+							hasWon = true;
+						}
+					}
+					
+					if (hasWon) {
+						var symbols = ["X's", "O's"]
+						var text = symbols[this.playerTurn - 1] + " win!";
+						
+						this.endGame(text);
+					} else {
+						this.movesTaken++;
+						
+						if (this.movesTaken == Math.pow(this.numCells, 2)) {
+							this.endGame("DRAW!");
+						}
+					}
+				}
+				
+				this.endGame = function(message) {
+					// Print a message on screen to let the user know the game is over and to click to restart
+					ctx.font = "40px Georgia";
+					
+					ctx.fillText(message,
+								(canvas.width / 2) - (ctx.measureText(message).width / 2),
+								(canvas.height / 2));
+					
+					var text = "Click to reset!";
+					ctx.font = "20px Georgia";
+					
+					ctx.fillText(text,
+								(canvas.width / 2) - (ctx.measureText(text).width / 2),
+								(canvas.height / 2) + 30);
+					
+					// Remove the click event handler from the canvas to stop any other moves from being made
+					canvas.removeEventListener("click", clicked);
+					
+					// Add a click event listener to reset the game
+					canvas.addEventListener("click", resetGame);
+				}
+			}
+			
+			// Called when the canvas is clicked on
+			function clicked(event) {
+				// Get the x and y position on the canvas where the user clicked
+				var xPos = event.clientX - canvas.offsetLeft;
+				var yPos = event.clientY - canvas.offsetTop;
+				
+				// Get the index of the cell the user clicked on i.e. [x][y]
+				var x = (xPos - (xPos % game.cellSize)) / 100;
+				var y = (yPos - (yPos % game.cellSize)) / 100;
+				
+				// If the cell is empty...
+				if (game.board[x][y] == null) {
+					// Set the cells value to that of the current player
+					game.board[x][y] = game.playerTurn;
+					
+					if (game.playerTurn == 1) {
+						game.drawX(x, y);
+						game.playerTurn = 2;
+					} else {
+						game.drawO(x, y);
+						game.playerTurn = 1;
+					}
+				} else {
+					console.log ("This (" + x + ", " + y + ") cell is not empty.");
+				}
+			}
+		</script>
+
+	</body>
+
+</html>

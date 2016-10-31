@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Transformations</title>
+		<meta charset="UTF-8">
+		<style type="text/css">
+			canvas {
+				border: solid black 1px;
+			}
+		</style>
+	</head>
+	
+	<body>
+		<canvas id="transcan"></canvas>
+		
+		<script type="text/javascript">
+			var canvas = document.getElementById('transcan');
+			var ctx = canvas.getContext('2d');
+			
+			var nosteps = 0;
+			
+			// The time since pacman last rotated. Used to show "rotation" text for half a second.
+			var timeSinceRotation;
+			
+			// Used to animate pacmans mouth opening and closing
+			var timeSinceAnimation = Date.now();	// Last time the mouth was animated
+			var pacmanMouthOpen = true;				// Determines if the mouth should be drawn opened or closed
+			
+			function drawPacman(size) {
+				ctx.beginPath();
+				
+				// Cheeck if pacmans mouth animation happened over 0.15 seconds ago
+				// If it did change the variables so that it will be animated
+				if ((Date.now() - timeSinceAnimation) / 1000 >= 0.15) {
+					pacmanMouthOpen = !pacmanMouthOpen;
+					timeSinceAnimation = Date.now();
+				}
+				
+				if (pacmanMouthOpen) {
+					ctx.arc(0, 0, size, Math.PI * 0.2, Math.PI * 1.8);
+					ctx.lineTo(0, 0);
+					ctx.closePath();
+				} else {
+					ctx.arc(0, 0, size, 0, Math.PI * 2);
+				}
+				
+				ctx.fillStyle = "rgb(255, 255, 0)";
+				ctx.fill();
+				ctx.stroke();
+				
+				// Draw pacmans eye
+				ctx.beginPath();
+				ctx.arc(0, -size / 2, size / 5, 0, Math.PI * 2);
+				ctx.fillStyle = "rgb(0, 0, 0)";
+				ctx.fill();
+			}
+			
+			function drawGrid() {
+				ctx.beginPath();
+				ctx.rect(60, 60, canvas.width - 120, canvas.height - 120);
+				ctx.stroke();
+			}
+			
+			function clear() {
+				ctx.save();
+				
+				ctx.setTransform(1, 0, 0, 1, 0, 0);
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				
+				// Draw grid
+				drawGrid();
+				
+				// Draw "rotation" text in the centre of the canvas
+				if ((Date.now() - timeSinceRotation) / 1000 <= 0.5) {
+					var fontSize = (20 + nosteps);
+					var text = "ROTATION";
+					ctx.font = fontSize + "px Georgia";
+					
+					ctx.fillText(text,
+								(canvas.width / 2) - (ctx.measureText(text).width / 2),
+								(canvas.height / 2));
+				}
+				
+				ctx.restore();
+			}
+			
+			function repeatme() {
+				clear();
+				
+				// Move and rotate
+				//ctx.translate(1, 0);
+				//ctx.rotate(Math.PI / 2);
+				
+				// Seperate transform functions
+				//ctx.transform(1, 0, 0, 1, 1, 0);
+				//ctx.transform(Math.cos(Math.PI / 2), Math.sin(Math.PI / 2), -Math.sin(Math.PI / 2), Math.cos(Math.PI / 2), 0, 0);
+				
+				// Single transform function
+				//ctx.transform(Math.cos(Math.PI / 2), Math.sin(Math.PI / 2), -Math.sin(Math.PI / 2), Math.cos(Math.PI / 2), 40, 0);
+				
+				// Move on the x axis and rotate every 400 steps
+				ctx.transform(1, 0, 0, 1, 1, 0);
+				
+				if (nosteps == 400) {
+					ctx.transform(Math.cos(Math.PI / 2), Math.sin(Math.PI / 2), -Math.sin(Math.PI / 2), Math.cos(Math.PI / 2), 0, 0);
+					timeSinceRotation = Date.now();
+					nosteps = 0;
+				}
+				
+				nosteps++;
+				
+				drawPacman(20);
+				
+				window.requestAnimationFrame(repeatme);
+			}
+			
+			function init() {
+				canvas.width = 460;
+				canvas.height = 460;
+				ctx.translate(30, 30);
+				repeatme();
+			}
+			
+			init();
+		</script>
+	</body>
+</html>
