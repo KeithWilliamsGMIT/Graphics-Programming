@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+            body {
+                padding: 0;
+                margin: 0;
+            }
+		</style>
+	</head>
+	
+	<body>
+        <!-- Include the three.js JavaScript library -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r79/three.js"></script>
+		
+		<script type="text/javascript">
+			// Create width and height variables
+			var width = window.innerWidth;
+			var height = window.innerHeight;
+			
+			// Add a scene
+			var scene = new THREE.Scene();
+			
+			// Create a sphere and add it to the scene
+			var geometry = new THREE.SphereGeometry(1, 32, 32);
+			// Change material to MeshLambertMaterial
+			var sphereMaterial = new THREE.MeshLambertMaterial( {color: 0x00ff00} );
+			
+			// Set the wireframe property in the MeshBasicMaterial parameter object to true
+			//material.wireframe = true;
+            
+            var sphere = new THREE.Mesh(geometry, sphereMaterial);
+            
+			sphere.castShadow = true;
+			scene.add(sphere);
+            
+            // Have the wireframe displayed on top of the MeshLambertMaterial
+            // Adapted from http://stackoverflow.com/questions/21219971/three-js-wireframe-renderd-behind-shadermaterial
+            var wireframe = new THREE.WireframeHelper(sphere, 0xffffff);
+            wireframe.material.linewidth = 2;
+            scene.add(wireframe);
+			
+			// Add a camera with a fov of 80 and z-position of 5 (2 was too close)
+			var camera = new THREE.PerspectiveCamera(80, width/height, 0.1, 1000);
+			camera.position.z = 5;
+			
+			// Add a renderer
+			var renderer = new THREE.WebGLRenderer();
+			renderer.setSize(width, height);
+            
+            // Set the renderer to render shadows
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            
+			document.body.appendChild(renderer.domElement);
+			
+			// Add a directional light
+			var directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+			directionalLight.position.set(0, 1, 2);
+			scene.add(directionalLight);
+			
+			// Add a plane to the scene
+			var geometry = new THREE.PlaneGeometry(8, 8);
+			var material = new THREE.MeshLambertMaterial( {color: 0xffffff, side: THREE.DoubleSide} );
+			var plane = new THREE.Mesh(geometry, material);
+			plane.receiveShadow = true;
+			scene.add(plane);
+			
+			// Plane position and rotation
+			plane.position.set(-4, 0, -4);
+			plane.rotation.set(0, 45, 0);
+			
+			// Add a spotlight
+			var spotLight = new THREE.SpotLight(0xffffff);
+			spotLight.position.set(3.5, 0, 2);
+			spotLight.lookAt(plane.position);
+			spotLight.castShadow = true;
+            
+            // Make the shadow smoother - Not in the problem sheet
+            spotLight.shadow.mapSize.width = 2048;
+            spotLight.shadow.mapSize.height = 2048;
+            
+			scene.add(spotLight);
+            
+            // Optional ambient light - Not in the problem sheet
+            scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+			
+			// Add Camera helper function
+			var helper = new THREE.CameraHelper(spotLight.shadow.camera);
+			scene.add(helper);
+			
+			var color = new THREE.Color(Math.random(), Math.random(), Math.random());
+			var velocity = 0.01;
+            
+			// Add and call a render() loop function and have it rotate the sphere
+			function render() {
+				requestAnimationFrame(render);
+				
+				// Code to rotate sphere
+				sphere.rotateX(Math.PI/180);
+				sphere.rotateY(Math.PI/180);
+				
+				// Translate the sphere left and right
+				sphere.position.x += velocity;	// World coordinates
+				//sphere.translateX(velocity);		// Local coordinates
+                
+                if (sphere.position.x >= 2 || sphere.position.x <= 0) {
+                    velocity *= -1;
+                }
+				
+                // Slowly change in colour
+				sphere.material.color.lerp(color, 0.05);
+                
+                if (sphere.material.color.getHex() == color.getHex()) {
+                    // Create a new colour to transition to
+					color = new THREE.Color(Math.random(), Math.random(), Math.random());
+				}
+				
+				renderer.render(scene, camera);
+			}
+			
+			render();
+		</script>
+	</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style type="text/css">
+			svg {
+				border: 1px solid black;
+			}
+		  
+            /* Use CSS to set the colours of the circle instead of using attributes */
+			circle {
+				fill: red;
+				stroke: black;
+			}
+		</style>
+	</head>
+	
+	<body>
+        <!-- Insert SVG tags -->
+		<svg>
+            <!-- Add a rectangle with width 100 and height 200, that has its top left corner at (10, 10) -->
+			<rect x="10" y="10" width="100" height="200" fill="rgb(0, 0, 255)"/>
+			
+            <!-- Add a circle with a fill colour, centred at (100, 100), with radius 20 -->
+            <!-- Moved the circle tag below the rect tag so thatit is drawn on top of the rectangle, rather than behind it -->
+			<circle id="circle" cx="100" cy="100" r="20"/> <!-- fill="rgb(255, 0, 0)" stroke="black" -->
+			
+			<!-- Experimenting with the transform attribute -->
+			<!--<g transform="translate(120, 120)">
+				<circle cx="0" cy="0" r="20"/>
+			</g>-->
+			
+            <!-- Add name in another colour, starting at (50, 50) and with font size 24 -->
+			<text x="50" y="50" font-size="24" fill="green">Keith</text>
+			
+            <!-- Draw PacMan on the screen using SVG  using the path command -->
+			<!-- https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths -->
+			<!-- M => Move To => Move to the start of the arc (NOT the centre) -->
+			<!-- A => Arc => Set x andy radius and the coordinates of where the arc ends -->
+			<!-- L => Line To => Line to the centre -->
+			<!-- Z => Close Command => Close the path -->
+			<path d="M175 75 A 35.35 35.35, 0, 1, 1, 175 25 L 150 50 Z"	fill="yellow" stroke="black"/>
+		</svg>
+		
+		<script type="text/javascript">
+			// Get a handle to the element with id circle
+			var circle = document.getElementById("circle");
+			
+			// Move the circle to (120, 120) after 1 second
+			setTimeout(function () {
+				circle.setAttribute("cx", 120);
+				circle.setAttribute("cy", 120);
+			}, 1000);
+			
+			// Change the colour of the circle to green after 2 seconds
+			setTimeout(function () {
+				circle.style.fill = "green";
+			}, 2000);
+		</script>
+	</body>
+</html>

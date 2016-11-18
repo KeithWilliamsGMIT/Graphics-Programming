@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>D3.js Demo</title>
+		<meta charset="UTF-8">
+		<style type="text/css">
+		path {
+			stroke: steelblue;
+			stroke-width: 2;
+			fill: none;
+			clip-path: url(#clip);
+		}
+		
+		.axis path,
+		.axis line {
+			fill: none;
+			stroke: grey;
+			stroke-width: 1;
+		}
+		
+		.zoom {
+			fill: white;
+		}
+		</style>
+	</head>
+	
+	<body>
+        <!-- Include the d3.js and jQuery JavaScript libraries -->
+		<script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+		<script src="https://d3js.org/d3.v4.min.js"></script>
+		
+		<script type="text/javascript">
+			function callback(json) {
+				// Print data to the console to confirm that the file was downloaded
+				//console.log(JSON.stringify(json.currency));
+				
+				var data = json.currency;
+				plotCurrencyData(data);
+			}
+			
+            // Download the JSON GBP/EUR file using Ajax
+			$.ajax({
+				url: "http://52.169.223.50/graphics/currency.json",
+				dataType: "jsonp"
+			})
+			
+			// Executed once the file has downloaded
+			function plotCurrencyData(data) {
+				// Set up SVG size and margins
+				var margin = {top: 50, right: 50, bottom: 50, left: 50},
+							width = 900 - margin.left - margin.right,
+							height = 670 - margin.top - margin.bottom;
+				
+				// Create x and y scales for GBP/EUR value (x-axis) and time (y-axis)
+				var y = d3.scaleLinear()
+					.domain(d3.extent(data, function(d) { return d["GBP/EUR"]}))
+					.range([height, 0]);
+				
+				// Modify d3.timeParse
+				var parseDate = d3.timeParse("%d/%m/%Y");
+				
+				var x = d3.scaleTime()
+					.domain(d3.extent(data, function(d) { return parseDate(d["Date"]); }))
+					.range([0, width]);
+				
+				var x2 = d3.scaleTime()
+					.domain(x.domain())
+					.range([0, width]);
+				
+				// Create axis (x and y) and line (d3.line()) objects - specify number of ticks in the axis
+				var xAxis = d3.axisBottom(x)
+							.ticks(10);
+							
+				var yAxis = d3.axisLeft(y)
+							.ticks(10);
+				
+				var valueline = d3.line()
+								.x(function(d) { return x(parseDate(d["Date"])); })
+								.y(function(d) { return y(d["GBP/EUR"]); });
+								
+				// Use D3 to add zoom functionality (only to the x-axis)
+				var zoom = d3.zoom()
+					.scaleExtent([1, 10])	// Determines how far the user can zoom in
+					.translateExtent([[0, 0], [width, height]])
+					.extent([[0, 0], [width, height]])
+					.on("zoom", zoomed);
+				
+				// Drawing the chart
+				// Append an SVG element to the webpage
+				var svg = d3.select("body")
+					.append("svg")
+						.attr("width", width + margin.left + margin.right)
+						.attr("height", height + margin.top + margin.bottom)
+					
+					.append("g")
+						// Adds an offset so that the numeric values are visible
+						.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+						.call(zoom);
+				
+				// Add labels for axes, increase default font sizes and add a chart label
+				svg.append("g")
+					.attr("class", "x axis")
+					.attr("transform", "translate(0, " + height + ")")
+					.call(xAxis);
+					
+				svg.append("g")
+					.attr("class", "y axis")
+					.call(yAxis);
+					
+				svg.append("rect")
+					.attr("transform", "translate(1, 0)") // Don't cover y axis
+					.attr("class", "zoom")
+					.attr("width", width)
+					.attr("height", height);
+				
+				// Used a clip path to stop the line appearing outside of the axis
+				// Adapted from http://bl.ocks.org/mbostock/34f08d5e11952a80609169b7917d4172
+				svg.append("defs").append("clipPath")
+						.attr("id", "clip")
+					.append("rect")
+						.attr("width", width)
+						.attr("height", height);
+				
+				svg.append("path")
+					.attr("class", "line")
+					.attr("width", width)
+					.attr("height", height)
+					.attr("d", valueline(data));
+				
+                // Use D3 to add zoom functionality (only to the x-axis)
+				function zoomed() {
+					var t = d3.event.transform;
+					x.domain(t.rescaleX(x2).domain());
+					d3.select(".line").attr("d", valueline(data));
+					d3.select(".x").call(xAxis);
+				}
+			}
+		</script>
+	</body>
+</html>
