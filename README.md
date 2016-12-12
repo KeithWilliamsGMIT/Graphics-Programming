@@ -17,3 +17,7 @@ In lab 8 I used D3.js to create a chart to compare the value of the GBP to the E
 + Three.js
 
 Three.js was used in lab 9 as an introduction to 3D graphics programming. It demonstrates 3D objects, materials, lights, cameras and shadows.
+
++ OpenCV
+
+OpenCV was used in labs 10, 11 and 12. I experimented with Sobel and Canny edge detection algorithms, as well as writting an edge detection algorithm manually. Harris, Shi Tomasi and Orb cornor detection algorithms were used in lab 11. We also drew matches between two slightly different images of the same object. In the last lab, computer vision was used to detect peoples faces and eyes, and also cats faces. I also experimented with three different colour spaces, RGB, HSV and HLS. I split each colour space into three colour channels. All image and classifier files are provided.
